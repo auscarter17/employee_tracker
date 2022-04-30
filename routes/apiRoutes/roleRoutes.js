@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../../config/connection');
+const db = require('../../db/connection');
 
 // Get all roles
 router.get('/roles', (req, res) => {
