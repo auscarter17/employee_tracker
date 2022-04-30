@@ -1,23 +1,22 @@
+const mysql = require('mysql2');
 const express = require('express');
-
-const PORT = process.env.PORT || 3001;
+const sequelize = require('./config/connection');
 const app = express();
+const PORT = process.env.PORT || 3001;
+const apiRoutes = require('./routes/apiRoutes');
 
 // Express middleware
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-app.get('/', (req, res) => {
-    res.json({
-      message: 'Hello World'
-    });
-  });
+// Use apiRoutes
+app.use('/api', apiRoutes);
 
-  // Default response for any other request (Not Found)
 app.use((req, res) => {
-    res.status(404).end();
-  });
+  res.status(404).end();
+})
 
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+// turn on connection to db and server
+sequelize.sync({ force: true }).then(() => {
+    app.listen(PORT, () => console.log(`Now listening on port ${PORT}`));
   });
