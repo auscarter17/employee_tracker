@@ -32,9 +32,6 @@ db.connect(err => {
   });
 });
 
-let allRoles = [];
-let allManagers = [];
-
 // Prompts to view/modify tables
 const userPrompt = async () => {
   return inquirer.prompt([
@@ -87,27 +84,7 @@ const userPrompt = async () => {
   });
 };
 
-const getRoles = async () => {
-  const sql = `SELECT title FROM roles`;
 
-  db.query(sql, (err, rows) => {
-     if (err) throw err;
-     rows.forEach(element => {
-        allRoles.push(element.title);
-     })
-  })
-}
-
-const getManagers = async () => {
-  const sql = `SELECT * FROM employees WHERE manager_id IS NULL`;
-
-  db.query(sql, (err, rows) => {
-    if (err) throw err;
-    rows.forEach(element => {
-      allManagers.push(element.first_name);
-    })
-  })
-}
 
 viewAllDepartments = () => {
   const sql = `SELECT * FROM departments`; 
@@ -120,7 +97,15 @@ viewAllDepartments = () => {
 };
 
 viewAllRoles = () => {
-  const sql = `SELECT * FROM roles`;
+  const sql = `SELECT 
+                roles.title,
+                roles.id,
+                departments.name AS departments
+                roles.salary,
+              FROM roles
+                LEFT JOIN departments
+                ON roles.department_id = departments.id`;
+
 
   db.query(sql, (err, rows) => {
     if (err) throw err;
@@ -130,7 +115,20 @@ viewAllRoles = () => {
 };
 
 viewAllEmployees = () => {
-  const sql = `SELECT * FROM employees`;
+  const sql = `SELECT 
+                employees.id, 
+                employees.first_name, 
+                employees.last_name,
+                roles.title, 
+                departments.name AS departments, 
+                roles.salary, 
+                CONCAT (manager.first_name, ' ' , manager.last_name) AS manager
+              FROM employees
+                LEFT JOIN roles
+                ON employees.role_id = roles.id
+                LEFT JOIN departments
+                ON roles.department_id = departments.id
+                LEFT JOIN employees manager ON employees.manager_id = manager.id`;
 
   db.query(sql, (err, rows) => {
     if (err) throw err;
@@ -144,8 +142,6 @@ addADepartment = () => {
 }
 
 addAnEmployee = () => {
-  getRoles();
-  getManagers();
   inquirer.prompt([
     {
       type: 'input',
