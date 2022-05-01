@@ -32,9 +32,11 @@ db.connect(err => {
   });
 });
 
+let allRoles = [];
+
 // Prompts to view/modify tables
-const userPrompt = () => {
-  inquirer.prompt([
+const userPrompt = async () => {
+  return inquirer.prompt([
       {
         name: 'choices',
         type: 'list',
@@ -84,6 +86,17 @@ const userPrompt = () => {
   });
 };
 
+const getRoles = async () => {
+  const sql = `SELECT title FROM roles`;
+
+  db.query(sql, (err, rows) => {
+     if (err) throw err;
+     rows.forEach(element => {
+        allRoles.push(element.title);
+     })
+  })
+}
+
 viewAllDepartments = () => {
   const sql = `SELECT * FROM departments`; 
 
@@ -112,4 +125,50 @@ viewAllEmployees = () => {
     console.table(rows);
     userPrompt();
   });
+};
+
+addADepartment = () => {
+  
+}
+
+addAnEmployee = () => {
+  getRoles();
+  inquirer.prompt([
+    {
+      type: 'input',
+      name: 'employeeFirstName',
+      message: `Enter employee's first name:`
+    },
+    {
+      type: 'input',
+      name: 'employeeLastName',
+      message: `Please enter employee's last name:`
+    },
+    {
+      type: 'list',
+      name: 'role',
+      message: 'Select Employee Role:',
+      choices: allRoles
+    }
+  ])
+     // determine which role the employee will have
+     .then(data => {
+      let index = allRoles.findIndex(element => {
+         if (element === data.role) {
+            return true;
+         }
+      })
+      index += 1;
+
+      const sql = `INSERT INTO employees (first_name, last_name, role_id) VALUES (?,?,?)`;
+      const params = [data.employeeFirstName, data.employeeLastName, index];
+
+      db.query(sql, params, (err, result) => {
+         if (err) throw err;
+      })
+      console.log("New employee successfully added.");
+   })
+   .then(() => {
+      userPrompt();
+   })
 };
