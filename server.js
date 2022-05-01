@@ -83,3 +83,33 @@ const userPrompt = () => {
         }
   });
 };
+
+viewAllDepartments = () => {
+  const sql = `SELECT * FROM departments`; 
+
+  db.query(sql, (err, rows) => {
+    if (err) throw err;
+    console.table(rows);
+    userPrompt();
+  });
+};
+
+viewAllRoles = () => {
+  const sql = `SELECT * FROM roles`;
+
+  db.query(sql, (err, rows) => {
+    if (err) throw err;
+    console.table(rows);
+    userPrompt();
+  });
+};
+
+viewAllEmployees = () => {
+  const sql = `SELECT * FROM employees`;
+
+  db.query(sql, (err, rows) => {
+    if (err) throw err;
+    console.table(rows);
+    userPrompt();
+  });
+};
