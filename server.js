@@ -85,18 +85,21 @@ const userPrompt = async () => {
 };
 
 
-
+// view all departments saved to DB 
 viewAllDepartments = () => {
   const sql = `SELECT * FROM departments`; 
 
   db.query(sql, (err, rows) => {
     if (err) throw err;
     console.table(rows);
+    // returns to initial prompt
     userPrompt();
   });
 };
 
+// view all roles within departments
 viewAllRoles = () => {
+  // pulls role information and brings over department names from id keys
   const sql = `SELECT 
                 roles.title,
                 roles.id,
@@ -112,6 +115,7 @@ viewAllRoles = () => {
   });
 };
 
+// view all employees in DB with their roles, salaries, and reporting managers
 viewAllEmployees = () => {
   const sql = `SELECT 
                 employees.id, 
@@ -135,6 +139,7 @@ viewAllEmployees = () => {
   });
 };
 
+// add a new department to DB
 addADepartment = () => {
   inquirer.prompt([
     {
@@ -151,6 +156,7 @@ addADepartment = () => {
       }
     }
   ])
+  // uses prompts to insert information into DB tables
     .then(answer => {
       const sql = `INSERT INTO departments (name)
                   VALUES (?)`;
@@ -162,6 +168,7 @@ addADepartment = () => {
     });
 };
 
+// add a new role to database
 addARole = () => {
   inquirer.prompt([
     {
@@ -182,6 +189,7 @@ addARole = () => {
       name: 'salary',
       message: 'What is the salary for this role?',
       validate: salary => {
+        // makes sure only numbers are entered when prompting for salary
         if (isNaN(salary)) {
           console.log('Please enter a number with no other symbols/characters.');
           return false;
@@ -202,6 +210,7 @@ addARole = () => {
         const dept = data.map(({ name, id }) => ({ name: name, value: id }));
 
         inquirer.prompt([
+          // chooses a department to attach to the role
           {
             type: 'list',
             name: 'dept',
@@ -226,6 +235,7 @@ addARole = () => {
     })
 }
 
+// adds a new employee to list of employees with role, department, and manager
 addAnEmployee = () => {
   inquirer.prompt([
     {
@@ -256,6 +266,7 @@ addAnEmployee = () => {
     }
   ])
     .then(answer => {
+      // stores employee name to combine with role, department, and manager later
       const employeeData = [answer.employeeFirstName, answer.employeeLastName]
       const roleSql = `SELECT roles.id, roles.title FROM roles`;
       db.query(roleSql, (error, data) => {
@@ -275,6 +286,7 @@ addAnEmployee = () => {
             const managerSql = `SELECT * FROM employees`;
             db.query(managerSql, (error, data) => {
               if (error) throw error;
+              // gets managers from employee list
               const managers = data.map(({ id, first_name, last_name }) => ({ name: first_name + " "+ last_name, value: id}));
               inquirer.prompt([
                 {
@@ -286,6 +298,7 @@ addAnEmployee = () => {
               ])
                 .then(managerChoice => {
                   const manager = managerChoice.manager;
+                  // pushes manager info into array containing new employee info
                   employeeData.push(manager);
                   const sql = `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?,?,?,?)`;
                   db.query(sql, employeeData, (error) => {
@@ -300,12 +313,13 @@ addAnEmployee = () => {
     });
 };;
 
+// update the role of an existing employee
 updateAnEmployeeRole = () => {
   const newEmployeeSql = `SELECT * FROM employees`;
 
   db.query(newEmployeeSql, (err, data) => {
     if (err) throw err;
-
+    // gets information about employees to update
   const employees = data.map(({ id, first_name, last_name }) => ({ name: first_name + " " + last_name, value: id }));
 
   inquirer.prompt([
@@ -333,6 +347,7 @@ updateAnEmployeeRole = () => {
             type: 'list',
             name: 'role',
             message: "What is the employee's new role?",
+            // presents a list of available roles to use to update new employee
             choices: roles
           }
         ])
@@ -344,6 +359,7 @@ updateAnEmployeeRole = () => {
             params[0] = role
             params[1] = employee
 
+            // uses sql to update employee parameters
             const sql = `UPDATE employees SET role_id = ? WHERE id = ?`;
 
             db.query(sql, params, (err, result) => {

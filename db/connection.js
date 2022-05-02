@@ -3,10 +3,11 @@ require('dotenv').config()
 
 const db = mysql.createConnection({
     host: 'localhost',
-    // Your MySQL username,
+    // gets username from dotenv
     user: process.env.DB_USER,
-    // Your MySQL password
+    // gets password from dotenv
     password: process.env.DB_PW,
+    // gets db name from dotenv
     database: process.env.DB_NAME
   });
 
