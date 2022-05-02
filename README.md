@@ -17,6 +17,7 @@
 
   # Usage
   Upon starting the project, you will be greeted with a menu of options. Use your arrow keys to navigate to the operation you wish to perform, and hit enter to select. If you are viewing data, the table will appear, and then you will be brought back to the initial menu. If you choose to edit or add data, you will be given prompts telling you what information is expected. Whenever you've created or editited information in your database, you will be given a confirmation message, and then taken back to the startup menu. The application can be closed at any time with CTRL+C. 
+  ![walkthrough](./assets/walkthrough_gif.gif)
 
   # Credit
   Created by Austin Carter. 
