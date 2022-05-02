@@ -100,13 +100,11 @@ viewAllRoles = () => {
   const sql = `SELECT 
                 roles.title,
                 roles.id,
-                departments.name AS departments
-                roles.salary,
+                departments.name AS departments,
+                roles.salary
               FROM roles
                 LEFT JOIN departments
                 ON roles.department_id = departments.id`;
-
-
   db.query(sql, (err, rows) => {
     if (err) throw err;
     console.table(rows);
@@ -138,7 +136,94 @@ viewAllEmployees = () => {
 };
 
 addADepartment = () => {
-  
+  inquirer.prompt([
+    {
+      type: 'input',
+      name: 'newDept',
+      message: `What's the name of the new Department?`,
+      validate: newDept => {
+        if (newDept) {
+          return true;
+        } else {
+          console.log('Please enter a name for the Department.');
+          return false;
+        }
+      }
+    }
+  ])
+    .then(answer => {
+      const sql = `INSERT INTO departments (name)
+                  VALUES (?)`;
+      db.query(sql, answer.newDept, (err, result) => {
+        if (err) throw err;
+        console.log('Department added.');
+        userPrompt();
+      });
+    });
+};
+
+addARole = () => {
+  inquirer.prompt([
+    {
+      type: 'input',
+      name: 'newRole',
+      message: 'What is the name of the Role?',
+      validate: newRole => {
+        if (newRole) {
+          return true;
+        } else {
+          console.log('Please enter a name for the role.');
+          return false;
+        }
+      }
+    },
+    {
+      type: 'input',
+      name: 'salary',
+      message: 'What is the salary for this role?',
+      validate: salary => {
+        if (isNaN(salary)) {
+          console.log('Please enter a number with no other symbols/characters.');
+          return false;
+        } else {
+          return true;
+        }
+      }
+    }
+  ])
+    .then(answer => {
+      const params = [answer.newRole, answer.salary];
+
+      const roleSql = `SELECT name, id FROM departments`;
+
+      db.query(roleSql, (err, data) => {
+        if (err) throw err;
+
+        const dept = data.map(({ name, id }) => ({ name: name, value: id }));
+
+        inquirer.prompt([
+          {
+            type: 'list',
+            name: 'dept',
+            message: "What department is the new role a part of?",
+            choices: dept
+          }
+        ])
+          .then(deptChoice => {
+            const dept = deptChoice.dept;
+            params.push(dept);
+
+            const sql = `INSERT INTO roles (title, salary, department_id)
+                        VALUES (?,?,?)`;
+
+            db.query(sql, params, (err, result) => {
+              if (err) throw err;
+              console.log('New role added.');
+              userPrompt();
+            })
+          })
+      })
+    })
 }
 
 addAnEmployee = () => {
@@ -214,3 +299,7 @@ addAnEmployee = () => {
       });
     });
 };;
+
+updateAnEmployeeRole = () => {
+  
+}
